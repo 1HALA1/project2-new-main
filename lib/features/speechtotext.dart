@@ -1,204 +1,365 @@
-import 'package:avatar_glow/avatar_glow.dart';
-import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_to_text.dart';
-import 'package:word_generator/word_generator.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:speech_to_text/speech_recognition_result.dart';
+import 'dart:async';
+import 'dart:math';
 
+import 'package:flutter/material.dart';
+import 'package:avatar_glow/avatar_glow.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:lottie/lottie.dart';
 
 import '../Widgets/Appbuttons.dart';
 import 'Congrats.dart';
 
-final RandomWord = WordGenerator();
-String noun = RandomWord.randomSentence(6);
-
-class Speechtotext extends StatefulWidget {
-  const Speechtotext({Key? key}) : super(key: key);
+class AuthPage extends StatefulWidget {
+  const AuthPage({Key? key}) : super(key: key);
 
   @override
-  State<Speechtotext> createState() => _SpeechtotextState();
+  State<AuthPage> createState() => _AuthPageState();
 }
 
-class _SpeechtotextState extends State<Speechtotext> {
+class _AuthPageState extends State<AuthPage> with SingleTickerProviderStateMixin {
   SpeechToText _speechToText = SpeechToText();
-  String _lastWords = '';
-  SpeechToText speechToText = SpeechToText();
+  String _recognizedWords = '';
   bool isListening = false;
-  bool isSuccessful = false;
   int successCounter = 0;
+  String noun = '';
+  bool showResult = false;
+  bool verification1Success = false;
+
+  late AnimationController _animationController;
+  FlutterTts flutterTts = FlutterTts();
+
   @override
   void initState() {
     super.initState();
     _initSpeech();
+    _initTTS();
+    _fetchRandomSentence().then((sentence) {
+      setState(() {
+        noun = sentence;
+      });
+    });
+    _animationController = AnimationController(vsync: this);
   }
 
-  /// This has to happen only once per app
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _speechToText.stop();
+    flutterTts.stop();
+    super.dispose();
+  }
+
   void _initSpeech() async {
     await _speechToText.initialize();
     setState(() {});
   }
 
-  /// Each time to start a speech recognition session
+  void _initTTS() async {
+    await flutterTts.setLanguage("en-US");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
+  }
+
   void _startListening() async {
     await _speechToText.listen(onResult: _onSpeechResult);
     setState(() {
       isListening = true;
+      showResult = false;
+      _animationController.repeat();
     });
+    print('Speech recognition started');
   }
 
-  /// Manually stop the active speech recognition session
   void _stopListening() async {
     await _speechToText.stop();
-    setState(() {
-      isListening = false;
+    _animationController.reset();
+    print('Speech recognition stopped');
+
+    Timer(Duration(seconds: 1), () {
+      bool result = _verifyText();
+      setState(() {
+        isListening = false;
+        showResult = true;
+        verification1Success = result;
+      });
+
+      Timer(Duration(seconds: 3), () {
+        if (mounted) {
+          setState(() {
+            showResult = false;
+          });
+        }
+      });
     });
   }
 
-  /// This is the callback that the SpeechToText plugin calls when
-  /// the platform returns recognized words.
   void _onSpeechResult(SpeechRecognitionResult result) {
     setState(() {
-      _lastWords = result.recognizedWords;
+      _recognizedWords = result.recognizedWords;
+    });
+    print('Recognized speech: $_recognizedWords');
+  }
+
+  Future<String> _fetchRandomSentence() async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('random_text')
+          .get();
+
+      List<String> sentences = [];
+
+      for (var doc in querySnapshot.docs) {
+        var data = doc.data() as Map<String, dynamic>?;
+
+        if (data != null && data.containsKey('texts')) {
+          var texts = data['texts'] as List;
+          sentences.addAll(texts.map((text) => text.toString()));
+        }
+      }
+
+      Random random = Random();
+      return sentences[random.nextInt(sentences.length)];
+    } catch (e) {
+      print('Error fetching random sentences: $e');
+      return '';
+    }
+  }
+
+  void _regenerateSen() {
+    _fetchRandomSentence().then((sentence) {
+      setState(() {
+        noun = sentence;
+        _recognizedWords = '';
+        showResult = false;
+        verification1Success = false;
+      });
     });
   }
 
+  bool _verifyText() {
+    var cleanedRecognizedWords = _recognizedWords.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '');
+    var cleanedNoun = noun.trim().toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '');
+
+    print('Verifying text: Recognized Words: $cleanedRecognizedWords, Noun: $cleanedNoun');
+    if (cleanedRecognizedWords == cleanedNoun) {
+      successCounter++;
+      print('Success counter: $successCounter');
+      return true;
+    }
+    print('ASR failed - no match');
+    return false;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    void regren() {
-      setState(() {
-        noun = RandomWord.randomSentence(6);
-        _lastWords = '';
-      });
-    }
-    bool SuccessState(successCounter)  {
-      if (successCounter >= 1){
-        return true;
-      }
-      return false;
-    }
-
-
-    bool verifyText() {
-      _lastWords = _lastWords.toLowerCase();
-      noun = noun.trim();
-
-      if (_lastWords.contains(noun)) {
-        successCounter++;
-        print(successCounter);
-        regren();
-
-        return true;
-      }
-      return false;
-    }
     return SafeArea(
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          iconTheme: const IconThemeData(color: Color(0xFFE3AC96)),
+          iconTheme: IconThemeData(color: Colors.black),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-      
+
         ),
-      
+
         body: Container(
           decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('lib/assets/Photos/background.jpg'),
-              fit: BoxFit.cover,
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                Colors.lightBlue[200]!, // Light blue ombre
+                Colors.orange[200]! // Light orange
+              ],
             ),
           ),
-          child: SingleChildScrollView(
-
-            physics: const BouncingScrollPhysics(),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [
+                  Colors.lightBlue[200]!, // Light blue ombre
+                  Colors.orange[200]! // Light orange
+                ],
+              ),
+            ),
             child: Container(
+              height: double.infinity,
+              width:  double.infinity,
+              decoration: BoxDecoration(
 
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.8,
-              alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-              margin: const EdgeInsets.only(bottom: 150),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height:33),
-                  Center(
+                gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: [
+                    Colors.lightBlue[200]!, // Light blue ombre
+                    Colors.orange[200]! // Light orange
+                  ],
+                ),
+              ),
+              child: SingleChildScrollView(
 
-                    child: Text(
-                      'Read the following words in the correct order for authentication: $noun',
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: isListening ? Colors.black87 : Colors.black54,
-                        fontWeight: FontWeight.w600,
+                physics: BouncingScrollPhysics(),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: [
+                        Colors.lightBlue[200]!, // Light blue ombre
+                        Colors.orange[200]! // Light orange
+                      ],
+                    ),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'To authenticate, tap the mic icon and read the sentence below:',
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      // If listening is active show the recognized words
-                      _speechToText.isListening
-                          ? _lastWords
-                      // If listening isn't active but could be tell the user
-                      // how to start it, otherwise indicate that speech
-                      // recognition is not yet ready or not supported on
-                      // the target device
-                          : _speechToText.isAvailable
-                          ? 'Tap the microphone to start listening...'
-                          : 'Speech not available',
-                    ),
-                  ),
-                  Expanded(
-                    child: verifyText()
-                        ? const Text("Success")
-                        : const Text("Failed"),
-                  ),
-                  const SizedBox(
-                    height: 120,
-                  ),
-                  AvatarGlow(
-                    animate: isListening,
-                    duration: const Duration(milliseconds: 2000),
-                    glowColor: const Color(0xFF2D2689),
-                    repeat: true,
-                    child: GestureDetector(
-                      onTap: () {
-                        _speechToText.isNotListening
-                            ? _startListening()
-                            : _stopListening();
-                      },
-                      child: CircleAvatar(
-                        backgroundColor: const Color(0xFF2D2689),
-                        radius: 50,
-                        child: Icon(
-                          isListening ? Icons.mic : Icons.mic_none,
-                          color: Colors.white,
-                          size: 40,
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded( // Wraps the Text widget to prevent overflow
+                            child: Text(
+                              '"$noun"',
+                              style: TextStyle(
+                                fontSize: 24,
+                                color: isListening ? Colors.yellow.shade800 : Colors.black54,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.volume_up),
+                            onPressed: () {
+                              if (noun.isNotEmpty) {
+                                flutterTts.speak(noun);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        _recognizedWords.isNotEmpty
+                            ? 'Recognized Speech: $_recognizedWords'
+                            : '',
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: isListening ? Colors.indigo : Colors.black54,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 40),
+                      if (showResult)
+                        AnimatedOpacity(
+                          opacity: 1.0,
+                          duration: Duration(seconds: 1),
+                          child: Center(
+                            child: SizedBox(
+                              width: 250,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: verification1Success ? Colors.green.withOpacity(0.6) : Colors.red.withOpacity(0.6),
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      verification1Success ? Icons.check_circle_outline : Icons.highlight_off,
+                                      color: Colors.white,
+                                      size: 28,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      verification1Success ? "Matched" : "Mismatched",
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      SizedBox(height: 30),
+                      GestureDetector(
+                        onTap: () {
+                          if (!_speechToText.isListening) {
+                            _startListening();
+                          } else {
+                            _stopListening();
+                          }
+                        },
+                        child: Container(
+                          width: 150,
+                          height: 150,
+                          child: Lottie.asset(
+                            'assets/microphone.json',
+                            controller: _animationController,
+                            onLoaded: (composition) {
+                              _animationController
+                                ..duration = composition.duration;
+                            },
+                            frameRate: FrameRate.max,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
-                    ),
+                      SizedBox(height: 60),
+                      Appbuttons(
+                        onPressed: _regenerateSen,
+                        text: "Regenerate a New Sentence",
+                      ),
+                      SizedBox(height: 25),
+                      Theme(
+                        data: Theme.of(context).copyWith(
+                          buttonTheme: ButtonThemeData(
+                            disabledColor: Colors.grey,
+                          ),
+                        ),
+                        child: Appbuttons(
+                          text: "Submit",
+                          onPressed: verification1Success ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Congrats(),
+                              ),
+                            );
+                          } : null,
+                          backgroundColor: verification1Success ? Color(0xFF2F66F5) : Colors.grey,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                    ],
                   ),
-                  const SizedBox(height: 30),
-                  Appbuttons(
-                    onPressed: () {
-                      regren();
-                    },
-                    text: "Click to regenerate a new words",
-                  ),
-                  const SizedBox(height: 15),
-                  Appbuttons(
-                    text: "Submit",
-                    onPressed:  SuccessState(successCounter) ? () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const Congrats()),
-                      );
-                    }
-                        : null,
-                  )
-                ],
+                ),
               ),
             ),
           ),

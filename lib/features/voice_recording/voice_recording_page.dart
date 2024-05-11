@@ -52,70 +52,94 @@ class VoiceRecordPageState extends State<VoiceRecordPage> with TickerProviderSta
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: buildAppBar(),
-      body: Container(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text("Record Your Voice", style: TextStyle(fontSize: 32)),
-              const SizedBox(height: 16),
-              const Text("Tap the microphone icon and read the",
-                  style: TextStyle(fontSize: 16)),
-              const Text("following sentence", style: TextStyle(fontSize: 16)),
-              const SizedBox(height: 16),
-              Text(
-                "\"${_sentences[sentenceCount].toString()}\"",
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              GestureDetector(
-                onTap: () =>
-                _isRecording
-                    ? _stopAndSaveRecording()
-                    : _startRecording(),
-                child: Lottie.asset(
-                  "assets/microphone.json",
-                  controller: _animationController,
-                  onLoaded: (composition) =>
-                  _animationController.duration = composition.duration,
+    return SafeArea(
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar:
+           AppBar(
+            backgroundColor: Colors.transparent,
+            iconTheme: const IconThemeData(color: Color(0xFFE3AC96)),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
 
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                Colors.lightBlue[200]!, // Light blue ombre
+                Colors.orange[200]! // Light orange
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text("Record Your Voice", style: TextStyle(fontSize: 32)),
+                const SizedBox(height: 16),
+                const Text("Tap the microphone icon and read the",
+                    style: TextStyle(fontSize: 16)),
+                const Text("following sentence", style: TextStyle(fontSize: 16)),
+                const SizedBox(height: 16),
+                Text(
+                  "\"${_sentences[sentenceCount].toString()}\"",
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-              ),
-              Appbuttons(
-                text: "New Sentence",
-                onPressed: () => changeSentence(),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _recordings.length,
-                  itemBuilder: (context, index) {
-                    if (_recordings.isEmpty) {
-                      return const SizedBox();
-                    }
-                    return ListTile(
-                      title: Text("Recording ${index + 1}"),
-                      onTap: () async => await _playRecording(_recordings[index]),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.play_arrow, color: Colors.grey[600]),
-                            onPressed: () async =>
-                            await _playRecording(_recordings[index]),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _showDeleteConfirmationDialog(index),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                GestureDetector(
+                  onTap: () =>
+                  _isRecording
+                      ? _stopAndSaveRecording()
+                      : _startRecording(),
+                  child: Lottie.asset(
+                    "assets/microphone.json",
+                    controller: _animationController,
+                    onLoaded: (composition) =>
+                    _animationController.duration = composition.duration,
+
+                  ),
                 ),
-              ),
-            ],
+                Appbuttons(
+                  text: "New Sentence",
+                  onPressed: () => changeSentence(),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _recordings.length,
+                    itemBuilder: (context, index) {
+                      if (_recordings.isEmpty) {
+                        return const SizedBox();
+                      }
+                      return ListTile(
+                        title: Text("Recording ${index + 1}"),
+                        onTap: () async => await _playRecording(_recordings[index]),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.play_arrow, color: Colors.grey[600]),
+                              onPressed: () async =>
+                              await _playRecording(_recordings[index]),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _showDeleteConfirmationDialog(index),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -44,46 +44,58 @@ class _passwordChangedSuccessfullyState
         backgroundColor: Colors.grey[200],
       ),
       backgroundColor: Colors.grey[200],
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _animationController != null
-              ? AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return Opacity(
-                opacity: _animation.value,
-                child: Transform.translate(
-                  offset: Offset(0.0, 50 * (1 - _animation.value)),
-                  child: Text(
-                    "Successful!",
-                    style: TextStyle(fontSize: 35),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [
+              Colors.lightBlue[200]!, // Light blue ombre
+              Colors.orange[200]! // Light orange
+            ],
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _animationController != null
+                ? AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: _animation.value,
+                  child: Transform.translate(
+                    offset: Offset(0.0, 50 * (1 - _animation.value)),
+                    child: Text(
+                      "Successful!",
+                      style: TextStyle(fontSize: 35),
+                    ),
                   ),
-                ),
-              );
-            },
-          )
-              : Container(),
-          Text(
-            "You have successfully changed your password. Please use your new password to login",
-            style: TextStyle(
-              fontSize: 18,
+                );
+              },
+            )
+                : Container(),
+            Text(
+              "You have successfully changed your password. Please use your new password to login",
+              style: TextStyle(
+                fontSize: 18,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(
-            height: 70,
-          ),
-          Center(
-            child: Appbuttons(
-              text: "continue",
-              routeName: '/Login',
-              width: 200,
-              height: 50,
+            SizedBox(
+              height: 70,
             ),
-          ),
-        ],
+            Center(
+              child: Appbuttons(
+                text: "continue",
+                routeName: '/Login',
+                width: 200,
+                height: 50,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,11 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_interfaces/features/Congrats.dart';
-import 'package:flutter_interfaces/features/Forgotpassword.dart';
+//import 'package:flutter_interfaces/features/Forgotpassword.dart';
 import 'package:flutter_interfaces/features/LandPage.dart';
 import 'package:flutter_interfaces/features/Login.dart';
 import 'package:flutter_interfaces/features/Managerinterface.dart';
 import 'package:flutter_interfaces/features/Passwordchangedsuccessfully.dart';
+import 'package:flutter_interfaces/features/Randomtext.dart';
 import 'package:flutter_interfaces/features/Report.dart';
 import 'package:flutter_interfaces/features/Resetpassword.dart';
 import 'package:flutter_interfaces/features/Signup.dart';
@@ -46,7 +47,7 @@ class MyApp extends StatelessWidget {
         "/LandPage": (context) => const LandPage(),
         "/Signup": (context) => const Signup(),
         "/Login": (context) => const Login(),
-        "/Forgotpassword": (context) => ForgotPassword(),
+        //"/Forgotpassword": (context) => ForgotPassword(),
         "/Resetpassword": (context) => Resetpassword(),
         "/Passwordchangedsuccessfully": (context) => Passwordchangedsuccessfully(),
 
@@ -54,10 +55,10 @@ class MyApp extends StatelessWidget {
         "/Managerinterface": (context) => const Managerinterface(),
         // RoutesConstants.voiceRecording: (context) => VoiceRecordPage(params: VoiceRecordParams()),
         "/RegistrationRequestsPage": (context) => const RegistrationRequestsPage(),
-        "/Speechtotext": (context) => const Speechtotext(),
+        "/AuthPage": (context) => const AuthPage(),
         "/Congrats": (context) => const Congrats(),
         "/Report": (context) =>  Report(),
-
+        " Randomtext" :(context) =>Randomtext(),
       },
     );
   }

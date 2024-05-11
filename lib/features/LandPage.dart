@@ -30,9 +30,13 @@ class _LandPageState extends State<LandPage> with SingleTickerProviderStateMixin
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('lib/assets/Photos/background.jpg'),
-            fit: BoxFit.cover,
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [
+              Colors.lightBlue[200]!, // Light blue ombre
+              Colors.orange[200]! // Light orange
+            ],
           ),
         ),
         child: Stack(
@@ -47,7 +51,7 @@ class _LandPageState extends State<LandPage> with SingleTickerProviderStateMixin
                       return Transform.translate(
                         offset: Offset(0, _animation.value),
                         child: Image.asset(
-                          'lib/assets/Photos/logowithoutbackground.png',
+                          'lib/assets/Photos/LOGO0.png',
                           width: 500,
                           height: 500,
                         ),
@@ -63,7 +67,7 @@ class _LandPageState extends State<LandPage> with SingleTickerProviderStateMixin
                         width: 150,
                         height: 50,
                         text: "Signup",
-                        routeName: '/Signup',
+                        routeName: '/Login',
                       ),
 
                       SizedBox(width: 20),

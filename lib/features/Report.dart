@@ -61,21 +61,37 @@ List<ChartSeries<Entry, DateTime>> _createMonthlyData() {
 class Report extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+    return SafeArea(
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent, // Make AppBar transparent
+          elevation: 0.0, // Remove shadow
+          iconTheme: IconThemeData(color: Color (0xFFE3AC96)),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
-      ),
-      body: ListView(
-        padding: EdgeInsets.all(16),
-        children: [
-          _buildChartSection("Daily Report", _createDailyData()),
-          _buildChartSection("Monthly Report", _createMonthlyData()),
-        ],
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                Colors.lightBlue[200]!, // Light blue ombre
+                Colors.orange[200]! // Light orange
+              ],
+            ),
+          ),
+          child: ListView(
+            padding: EdgeInsets.all(16),
+            children: [
+              _buildChartSection("Daily Report", _createDailyData()),
+              _buildChartSection("Monthly Report", _createMonthlyData()),
+            ],
+          ),
+        ),
       ),
     );
   }

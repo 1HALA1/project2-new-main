@@ -153,12 +153,16 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> {
           title: const Text('Registrations'),
         ),
         body: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('lib/assets/Photos/logo.jpg'),
-                fit: BoxFit.cover,
-              ),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                Colors.lightBlue[200]!, // Light blue ombre
+                Colors.orange[200]! // Light orange
+              ],
             ),
+          ),
 
           child: ListView.builder(
             itemCount: _users.length,

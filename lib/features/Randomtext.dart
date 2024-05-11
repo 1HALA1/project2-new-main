@@ -27,103 +27,117 @@ class RandomTextState extends State<Randomtext> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent, // Make AppBar transparent
+        elevation: 0.0, // Remove shadow
+        iconTheme: IconThemeData(color: Color (0xFFE3AC96)),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
 
       //a ListView of random texts frm FB using manger
       //each text is displayed as a ListTile
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: _manager.randomTexts.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(_manager.randomTexts[index]),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Appbuttons(
-                              text: 'Edit',
-                              width: 110,
-                              height: 30,
-                              onPressed: () {
-                                // Wrap the call inside an anonymous function
-                                _showEditDialog(index, _manager.randomTexts[index]);
-                              },
-                              backgroundColor: Colors.green,
-                            ),
-                            const SizedBox(width: 8.0),
-                            Appbuttons(
-                              text: 'Delete',
-                              width: 110,
-                              height: 30,
-                              onPressed: () {
-                                // Wrap the call inside an anonymous function
-                                _manager.deleteRandomText(index);
-                                setState(() {}); //to update the UI
-                              },
-                              backgroundColor: Colors.red,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [
+              Colors.lightBlue[200]!, // Light blue ombre
+              Colors.orange[200]! // Light orange
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _manager.randomTexts.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_manager.randomTexts[index]),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Appbuttons(
+                                text: 'Edit',
+                                width: 110,
+                                height: 30,
+                                onPressed: () {
+                                  // Wrap the call inside an anonymous function
+                                  _showEditDialog(index, _manager.randomTexts[index]);
+                                },
+                                backgroundColor: Colors.green,
+                              ),
+                              const SizedBox(width: 8.0),
+                              Appbuttons(
+                                text: 'Delete',
+                                width: 110,
+                                height: 30,
+                                onPressed: () {
+                                  // Wrap the call inside an anonymous function
+                                  _manager.deleteRandomText(index);
+                                  setState(() {}); //to update the UI
+                                },
+                                backgroundColor: Colors.red,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (!_isAddingText)
-                    Appbuttons(
-                      text: 'Add Random Text',
-                      width: 200,
-                      height: 40,
-                      onPressed: () {
-                        setState(() {
-                          _isAddingText = true;
-                        });
-                      },
-                    ),
-                  if (_isAddingText) // adding a new random text
-                    Expanded(
-                      child: TextField(
-                        controller: _textController,
-                        decoration: InputDecoration(
-                          hintText: 'Enter Random Text',
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.send),
-                            onPressed: () {
-                              _manager.addRandomText(_textController.text);
-                              _textController.clear();
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (!_isAddingText)
+                      Appbuttons(
+                        text: 'Add Random Text',
+                        width: 200,
+                        height: 40,
+                        onPressed: () {
+                          setState(() {
+                            _isAddingText = true;
+                          });
+                        },
+                      ),
+                    if (_isAddingText) // adding a new random text
+                      Expanded(
+                        child: TextField(
+                          controller: _textController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter Random Text',
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.send),
+                              onPressed: () {
+                                _manager.addRandomText(_textController.text);
+                                _textController.clear();
 
-                              setState(() {
-                                _isAddingText = false; // back to false
-                              });
-                            },
+                                setState(() {
+                                  _isAddingText = false; // back to false
+                                });
+                              },
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
