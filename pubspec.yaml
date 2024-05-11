@@ -35,6 +35,7 @@ dependencies:
   flutter_ffmpeg: ^0.4.0
   url_launcher: ^6.0.13
   flutter_tts: ^3.0.0
+  syncfusion_flutter_charts: ^20.2.48
 
 
 
@@ -54,14 +55,11 @@ dependencies:
   record: ^4.4.4
   mailer: ^6.1.0
   lottie: ^3.1.0
-  word_generator: ^0.4.4
+
+  audio_video_progress_bar: ^2.0.1
   avatar_glow: ^3.0.1
+  #word_generator: ^0.4.4
   confetti: ^0.7.0
-  fl_chart: ^0.67.0
-  syncfusion_flutter_charts: ^25.1.40
-
-
-
 
 dev_dependencies:
   flutter_test:
@@ -89,12 +87,12 @@ flutter:
   assets:
     - assets/microphone.json
   # To add assets to your application, add an assets section, like this:
-
-    - lib/assets/Photos/background.jpg
-    - lib/assets/Photos/logo.jpg
-    - lib/assets/Photos/logowithoutbackground.png
-    - lib/assets/Photos/LOGO0.png
-    - lib/assets/Photos/LOGO0.png
+    - assets/Photo/background1.jpg
+    - assets/Photo/background2.jpg
+    - assets/Photo/logo1.jpg
+    - assets/Photo/logo2.jpg
+    - assets/Photo/LOGO0.png
+    - assets/Photo/LOGO01.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
