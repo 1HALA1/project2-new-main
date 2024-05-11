@@ -36,6 +36,7 @@ dependencies:
   url_launcher: ^6.0.13
   flutter_tts: ^3.0.0
   syncfusion_flutter_charts: ^20.2.48
+   fl_chart: ^0.67.0
 
 
 
